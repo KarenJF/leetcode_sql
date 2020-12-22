@@ -7,7 +7,6 @@ Mary wants to change seats for the adjacent students.
 
 Can you write a SQL query to output the result for Mary?
 
- 
 
 +---------+---------+
 |    id   | student |
@@ -46,4 +45,16 @@ select
     LAG(id, 1) over() as seat1,
     LEAD(id, 1) over() as seat2
 from seat) a
+order by 1
+
+-- Solution 2
+select 
+    (case when id%2 != 0 and id != seats_sum then id + 1
+          when id%2 != 0 and id = seats_sum then id
+          else id-1 end) as id, 
+    student
+from seat,
+    (select 
+        count(*) as seats_sum
+    from seat) a 
 order by 1

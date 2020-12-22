@@ -20,15 +20,15 @@ The query result format is in the following example:
 
 Logs table:
 +----+-----+
-| Id | Num |
+| Id | Num | LAG(NUM,1) | LAG(NUM, 2) 
 +----+-----+
-| 1  | 1   |
-| 2  | 1   | 
-| 3  | 1   | 
-| 4  | 2   | 
-| 5  | 1   |
-| 6  | 2   |
-| 7  | 2   |
+| 1  | 1   | NULL       | NULL        
+| 2  | 1   | 1          | NULL
+| 3  | 1   | 1          | 1
+| 4  | 2   | 1          | 1
+| 5  | 1   | 2          | 1
+| 6  | 2   | 1          | 2
+| 7  | 2   | 2          | 1
 +----+-----+
 
 Result table:
@@ -48,8 +48,8 @@ SELECT
     LEAD(Num, 1) OVER() AS Num1, 
     LEAD(Num, 2) OVER() AS Num2
 FROM Logs ) a
-where a.Num = a.Num1 and a.Num = a.Num2 and a.Num1 = a.Num2
-    
+where a.Num = a.Num1 and a.Num1 = a.Num2
+
 -- Solution 2
 select DISTINCT a.Num as ConsecutiveNums
 from (
