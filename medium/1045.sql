@@ -63,6 +63,7 @@ WITH cust_product_cnt as (
         c.customer_id, 
         count(distinct c.product_key) as p_keys
     from Customer c
+    where c.product_key in (select distinct product_key from Product)
     group by c.customer_id)
     
     
