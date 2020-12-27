@@ -1,6 +1,5 @@
 /* 608. Tree Node
 Given a table tree, id is identifier of the tree node and p_id is its parent node's id.
-
 +----+------+
 | id | p_id |
 +----+------+
@@ -52,3 +51,35 @@ If there is only one node on the tree, you only need to output its root attribut
 */
 
 --Solution 
+WITH root_id as (
+    select distinct 
+        id
+    from tree
+    where p_id is null
+),
+
+parent_id as (
+    select distinct a.id
+    from tree a 
+    join tree b 
+    on a.id = b.p_id
+)
+
+select 
+    t.id,
+    (case when t.id in (select id from root_id) then 'Root'
+          when t.id in (select id from parent_id) then 'Inner'
+          else 'Leaf' end) as Type
+from tree t
+left join root_id r on t.id = r.id
+left join parent_id p on t.id = p.id
+order by 1
+
+-- Solution 2
+select 
+    id, 
+    (case when p_id is null then 'Root'
+          when id in (select p_id from tree) then 'Inner'
+          else 'Leaf' end) as Type
+from tree
+order by id
