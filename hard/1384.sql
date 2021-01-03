@@ -64,34 +64,36 @@ LC Keychain was sold for the period of 2019-12-01 to 2020-01-31, and there are 3
 */
 
 -- Solution 
-WITH recursive year_tb as (
+WITH recursive year_tb as(
     select 
-        product_id, 
-        period_start, 
+        product_id,
+        period_start,
         (case when year(period_start) = year(period_end) then period_end
               else date(concat(year(period_start),"-12-31")) end) as period_end,
         period_end as period_end_final,
         average_daily_sales
     from Sales
+
+    UNION
     
-    UNION 
-    
-    select
-        product_id, 
+    select 
+        product_id,
         date(concat(year(period_end)+1,"-01-01")) as period_start,
         (case when (year(period_end)+1) = year(period_end_final) then period_end_final
-             else date(concat((year(period_end)+1),"-12-31")) end ) as period_end,
-        period_end_final, average_daily_sales
-    from year_tb 
-    where year(period_end) < year(period_end_final)
+              else date(concat((year(period_end)+1),"-12-31")) end) as period_end,
+        period_end_final,
+        average_daily_sales
+    from year_tb
+    where year(period_end)<year(period_end_final)
 )
 
-select
-    t.product_id, 
+select 
+    y.product_id,
     p.product_name,
     concat(year(period_start)) as report_year,
-    (DATEDIFF(period_end, period_start) +1) * average_daily_sales as total_amount
-from year_tb t
+    (datediff(period_end,period_start)+1) *average_daily_sales as total_amount
+from year_tb y
 join product p
-on t.product_id = p.product_id
-order by t.product_id, report_year
+on y.product_id = p.product_id
+order by y.product_id, report_year
+

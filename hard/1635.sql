@@ -132,6 +132,56 @@ By the end of December --> six active drivers (10, 8, 5, 7, 4, 1) and one accept
 */
 
 --Solution 
+WITH RECURSIVE monthly_tb as (
+    select 1 as month
+    UNION ALL
+    select month + 1 as month 
+    from monthly_tb 
+    where month <12
+),
+
+driver_tb as (
+    select 
+        (case when year(join_date) <2020 then 1
+              else month(join_date) end) as join_month,
+        count(distinct driver_id) as driver_mth
+    from Drivers
+    where year(join_date)<=2020
+    group by join_month
+    order by join_month
+),
+
+active_drivers as (
+    select 
+        m.month,
+        sum(driver_mth) over (order by m.month) as driver_cnt
+    from monthly_tb m
+    left join driver_tb d
+    on m.month = d.join_month
+),
+
+accept_ride as (
+    select 
+        month(r.requested_at) as month,
+        count(r.ride_id) as accepted_rides
+    from Rides r
+    join AcceptedRides a 
+    on r.ride_id = a.ride_id
+    where year(r.requested_at) = 2020
+    group by month(r.requested_at)
+    order by month(r.requested_at)
+)
+
+select 
+    a.month,
+    ifnull(a.driver_cnt,0) as active_drivers,
+    ifnull(r.accepted_rides,0) as accepted_rides
+
+from active_drivers a
+left join accept_ride r
+on a.month = r.month
+
+--Solution 2
 WITH RECURSIVE row_table as (
     select 
         1 as month 
